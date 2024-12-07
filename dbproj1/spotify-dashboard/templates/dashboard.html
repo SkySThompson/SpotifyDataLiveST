@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Stats Dashboard</title>
+    <style>
+        body {
+            font-family: 'Circular', Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1E1E1E;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #1DB954;
+            border-bottom: 2px solid #1DB954;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 24px;
+        }
+        .track {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #282828;
+            color: #FFFFFF;
+            padding: 15px;
+            border-radius: 8px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .track:hover {
+            transform: scale(1.02);
+            background-color: #3E3E3E;
+        }
+        .track img {
+            width: 64px;
+            height: 64px;
+            border-radius: 4px;
+            margin-right: 20px;
+        }
+        .track h3, .track p {
+            margin: 0;
+        }
+        .track-info {
+            flex-grow: 1;
+        }
+        .track-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .track-info p {
+            color: #B3B3B3;
+            font-size: 14px;
+        }
+        .play-button {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: url('https://img.icons8.com/ios-filled/50/1DB954/play--v1.png') no-repeat center center;
+            background-size: contain;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .logout-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1DB954;
+            color: #FFFFFF;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .logout-button:hover {
+            background-color: #1ED760;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Your Saved Tracks</h1>
+        <div id="saved-tracks-container"></div>
+        <h1>Your Top Tracks</h1>
+        <div id="top-tracks-container"></div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Retrieve data from Jinja context
+            const savedTracks = JSON.parse('{{ saved_tracks | tojson | safe }}');
+            const topTracks = JSON.parse('{{ top_tracks | tojson | safe }}');
+            
+            // Function to create a play button
+            function createPlayButton(previewUrl) {
+                if (!previewUrl) return '';
+                return `
+                    <iframe src="https://open.spotify.com/embed?uri=${previewUrl}" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+                `;
+            }
+            
+            // Populate Saved Tracks
+            const savedContainer = document.getElementById('saved-tracks-container');
+            savedTracks.forEach(function(track) {
+                const trackElement = document.createElement('div');
+                trackElement.className = 'track';
+                trackElement.innerHTML = `
+                    <img src="${track.album_cover}" alt="${track.album}">
+                    <div class="track-info">
+                        <h3>${track.name}</h3>
+                        <p><strong>Artist:</strong> ${track.artist}</p>
+                        <p><strong>Album:</strong> ${track.album}</p>
+                    </div>
+                    ${createPlayButton(track.preview_url)}
+                `;
+                savedContainer.appendChild(trackElement);
+            });
+
+            // Populate Top Tracks
+            const topContainer = document.getElementById('top-tracks-container');
+            topTracks.forEach(function(track) {
+                const trackElement = document.createElement('div');
+                trackElement.className = 'track';
+                trackElement.innerHTML = `
+                    <img src="${track.album_cover_url}" alt="${track.album_name}">
+                    <div class="track-info">
+                        <h3>${track.track_name}</h3>
+                        <p><strong>Artist:</strong> ${track.artist_name}</p>
+                        <p><strong>Album:</strong> ${track.album_name}</p>
+                        <p><strong>Play Count:</strong> ${track.play_count}</p>
+                    </div>
+                    ${createPlayButton(track.preview_url)}
+                `;
+                topContainer.appendChild(trackElement);
+            });
+        });
+    </script>
+</body>
+</html>
